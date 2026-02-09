@@ -1,141 +1,214 @@
-const KEY = "2e9e546f6ff93e7ec5e88c36c52ab522"
-const currentWeatherBaseURL = "https://api.openweathermap.org/data/2.5/weather"
+// CONFIG
 
-const forecastBaseURL = "https://api.openweathermap.org/data/2.5/forecast"
+const API_KEY = "2e9e546f6ff93e7ec5e88c36c52ab522";
 
-const aqiBaseURL = "https://api.openweathermap.org/data/2.5/air_pollution"
+const API = {
+    GEO: "https://api.openweathermap.org/geo/1.0/direct",
+    CURRENT: "https://api.openweathermap.org/data/2.5/weather",
+    FORECAST: "https://api.openweathermap.org/data/2.5/forecast",
+    UV: "https://api.openweathermap.org/data/2.5/uvi",
+    AQI: "https://api.openweathermap.org/data/2.5/air_pollution",
+    ICON: "https://openweathermap.org/img/wn/"
+};
 
-const uvIndexBaseURL = "https://api.openweathermap.org/data/2.5/uvi"
 
-const iconBaseURL = "https://openweathermap.org/img/wn/"
+// DOM CACHE (avoid re-query)
 
-async function setForecast(cityCoords) {
-    const forcastURL = `${forecastBaseURL}?lat=${cityCoords[0]}&lon=${cityCoords[1]}&appid=${KEY}&units=metric`
+const DOM = {
+    form: document.querySelector("form"),
+    cityInput: document.querySelector(".city-input"),
 
-    const forecastItems = document.querySelectorAll(".forecast-item")
-    const forecastDateItems = document.querySelectorAll(".forecast-item-date")
-    const forecastImgItems = document.querySelectorAll(".forecast-item-img")
-    const forecastTempItems = document.querySelectorAll(".forecast-item-temp")
+    searchPage: document.querySelector(".search-city"),
+    weatherPage: document.querySelector(".weather-info"),
+    notFoundPage: document.querySelector(".not-found"),
 
-    const response = await ((await fetch(forcastURL)).json())
+    cityName: document.querySelector(".country-txt"),
+    dateText: document.querySelector(".current-date-txt"),
+    tempText: document.querySelector(".temp-txt"),
+    conditionText: document.querySelector(".condition-txt"),
+    weatherIcon: document.querySelector(".weather-summary-img"),
 
-    const filteredData = response.list.filter(item =>
+    humidityText: document.querySelector(".humidity-value-txt"),
+    windText: document.querySelector(".wind-value-txt"),
+    uvText: document.querySelector(".uv-value-txt"),
+    aqiText: document.querySelector(".aqi-value-txt"),
+
+    forecastDates: document.querySelectorAll(".forecast-item-date"),
+    forecastTemps: document.querySelectorAll(".forecast-item-temp"),
+    forecastIcons: document.querySelectorAll(".forecast-item-img")
+};
+
+
+// API FUNCTIONS
+
+async function getCoordinates(cityName) {
+    const url = `${API.GEO}?q=${cityName}&limit=1&appid=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data[0];
+}
+
+async function getCurrentWeather(lat, lon) {
+    const url = `${API.CURRENT}?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+    const res = await fetch(url);
+    return await res.json();
+}
+
+async function getForecast(lat, lon) {
+    const url = `${API.FORECAST}?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+    const res = await fetch(url);
+    return await res.json();
+}
+
+async function getUVIndex(lat, lon) {
+    const url = `${API.UV}?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+    const res = await fetch(url);
+    return await res.json();
+}
+
+async function getAirQuality(lat, lon) {
+    const url = `${API.AQI}?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+    const res = await fetch(url);
+    return await res.json();
+}
+
+
+// HELPER FUNCTIONS
+
+function formatDate(timestamp, country) {
+    const date = new Date(timestamp * 1000);
+    const day = date.toLocaleString(`en-${country}`, { weekday: "short" });
+    const dayNum = String(date.getDate()).padStart(2, "0");
+    const month = date.toLocaleString(`en-${country}`, { month: "short" });
+    return `${day}, ${dayNum} ${month}`;
+}
+
+function getWeatherIcon(iconCode) {
+    return `${API.ICON}${iconCode}@2x.png`;
+}
+
+function convertWindToKmH(speedMs) {
+    return (speedMs * 3.6).toFixed(1);
+}
+
+function getAQILabel(aqiNumber) {
+    const map = {
+        1: "Good",
+        2: "Fair",
+        3: "Moderate",
+        4: "Poor",
+        5: "Very Poor"
+    };
+    return map[aqiNumber] || "Unknown";
+}
+
+
+// PAGE VISIBILITY
+
+function showWeatherPage() {
+    DOM.searchPage.style.display = "none";
+    DOM.notFoundPage.style.display = "none";
+    DOM.weatherPage.style.display = "";
+}
+
+function showNotFoundPage() {
+    DOM.searchPage.style.display = "none";
+    DOM.weatherPage.style.display = "none";
+    DOM.notFoundPage.style.display = "";
+}
+
+
+// UI UPDATE FUNCTIONS
+
+
+// Basic weather
+function updateMainWeatherUI(weather) {
+    DOM.cityName.textContent = weather.name;
+    DOM.dateText.textContent = formatDate(weather.dt, weather.sys.country);
+    DOM.tempText.innerHTML = `${Math.trunc(weather.main.temp)}&#176;C`;
+    DOM.conditionText.textContent = weather.weather[0].main;
+    DOM.weatherIcon.src = getWeatherIcon(weather.weather[0].icon);
+}
+
+// Humidity
+function updateHumidityUI(weather) {
+    DOM.humidityText.textContent = `${weather.main.humidity}%`;
+}
+
+// Wind
+function updateWindUI(weather) {
+    DOM.windText.textContent = `${convertWindToKmH(weather.wind.speed)} km/h`;
+}
+
+// UV
+function updateUVUI(uvData) {
+    DOM.uvText.textContent = uvData.value;
+}
+
+// AQI
+function updateAQIUI(aqiData) {
+    const aqiNum = aqiData.list[0].main.aqi;
+    DOM.aqiText.textContent = getAQILabel(aqiNum);
+}
+
+// Forecast
+function updateForecastUI(forecast) {
+    const noonData = forecast.list.filter(item =>
         item.dt_txt.includes("12:00:00")
     );
 
-    filteredData.forEach((day, i) => {
+    noonData.forEach((day, i) => {
+        const date = new Date(day.dt * 1000);
+        const dayNum = String(date.getDate()).padStart(2, "0");
+        const month = date.toLocaleString(`en-${forecast.city.country}`, { month: "short" });
 
-        const date = new Date(day.dt * 1000)
-        const dateNum = date.getDate()
-        const monthName = date.toLocaleString(`en-${response.city.country}`, { month: "short" })
-
-        forecastDateItems[i].textContent = `${dateNum < 10 ? `0${dateNum}` : dateNum} ${monthName}`
-
-        forecastTempItems[i].innerHTML = `${Math.trunc(day.main.temp)}&#176;C`
-
-        const iconURL = `${iconBaseURL}${day.weather[0].icon}@2x.png`
-        forecastImgItems[i].src = iconURL
-
-    })
-
+        DOM.forecastDates[i].textContent = `${dayNum} ${month}`;
+        DOM.forecastTemps[i].innerHTML = `${Math.trunc(day.main.temp)}&#176;C`;
+        DOM.forecastIcons[i].src = getWeatherIcon(day.weather[0].icon);
+    });
 }
 
-function getAQILevel(aqi) {
-    if (aqi === 1) return "Good";
-    if (aqi === 2) return "Fair";
-    if (aqi === 3) return "Moderate";
-    if (aqi === 4) return "Poor";
-    return "Very Poor";
+
+// MAIN CONTROLLER
+
+async function handleCitySearch(e) {
+    e.preventDefault();
+
+    const cityName = DOM.cityInput.value.trim();
+    if (!cityName) return alert("Please enter a city");
+
+    try {
+        const coords = await getCoordinates(cityName);
+        if (!coords) return showNotFoundPage();
+
+        showWeatherPage();
+
+        const { lat, lon } = coords;
+
+        const weather = await getCurrentWeather(lat, lon);
+        const forecast = await getForecast(lat, lon);
+        const uv = await getUVIndex(lat, lon);
+        const aqi = await getAirQuality(lat, lon);
+
+        updateMainWeatherUI(weather);
+        updateHumidityUI(weather);
+        updateWindUI(weather);
+        updateUVUI(uv);
+        updateAQIUI(aqi);
+        updateForecastUI(forecast);
+
+    } catch (error) {
+        console.error(error);
+        showNotFoundPage();
+    }
 }
 
-async function findWeather(cityCoords) {
-    const currentWeatherURL = `${currentWeatherBaseURL}?lat=${cityCoords[0]}&lon=${cityCoords[1]}&units=metric&appid=${KEY}`
 
-    const response = await (await fetch(currentWeatherURL)).json()
-
-    const cityName = document.querySelector(".country-txt")
-    cityName.textContent = response.name
-
-    const dateTxt = document.querySelector(".current-date-txt")
-
-    const date = new Date(response.dt * 1000)
-    const dayName = date.toLocaleString(`en-${response.sys.country}`, { weekday: "short" })
-    const dateNum = date.getDate()
-    const monthName = date.toLocaleString(`en-${response.sys.country}`, { month: "short" })
-
-    dateTxt.textContent = `${dayName}, ${dateNum < 10 ? `0${dateNum}` : dateNum} ${monthName}`
-
-    const tempTxt = document.querySelector(".temp-txt");
-    tempTxt.innerHTML = `${Math.trunc(response.main.temp)}&#176;C`
-
-    const conditionTxt = document.querySelector(".condition-txt")
-    conditionTxt.textContent = `${response.weather[0].main}`
-
-    const mainImg = document.querySelector(".weather-summary-img")
-
-
-    const iconURL = `${iconBaseURL}${response.weather[0].icon}@2x.png`
-    mainImg.src = iconURL
-
-    const humidityTxt = document.querySelector(".humidity-value-txt")
-    const windSpeedTxt = document.querySelector(".wind-value-txt")
-    const uvIndexTxt = document.querySelector(".uv-value-txt")
-    const aqiTxt = document.querySelector(".aqi-value-txt")
-
-    const humidityVal = response.main.humidity
-    humidityTxt.textContent = `${humidityVal}%`
-
-    const windSpeedVal = (response.wind.speed * 3.6).toFixed(1)
-
-    windSpeedTxt.textContent = `${windSpeedVal} km/h`
-
-    const uvIndexURL = `${uvIndexBaseURL}?lat=${cityCoords[0]}&lon=${cityCoords[1]}&appid=${KEY}`
-    const uvIndexVal = (await (await fetch(uvIndexURL)).json()).value
-    uvIndexTxt.textContent = uvIndexVal
-
-    const aqiURL = `${aqiBaseURL}?lat=${cityCoords[0]}&lon=${cityCoords[1]}&appid=${KEY}`
-    const aqiRes = await (await fetch(aqiURL)).json()
-    const aqiVal = getAQILevel(parseInt(aqiRes.list[0].main.aqi))
-
-    aqiTxt.textContent = aqiVal;
-
-    await setForecast(cityCoords)
-}
-
-const coordinateBaseURL = "https://api.openweathermap.org/geo/1.0/direct"
+// MAIN FUNCTION
 
 function main() {
-    document.querySelector("form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const city = document.querySelector(".city-input").value;
-
-        if (!city) {
-            alert("Please! Enter a City.")
-            return
-        };
-        const coordinateURL = `${coordinateBaseURL}?q=${city}&limit=1&appid=${KEY}`
-        const response = await fetch(coordinateURL)
-
-        const coords = await response.json()
-
-        const weatherPage = document.querySelector(".weather-info")
-        const searchCityPage = document.querySelector(".search-city")
-        const notFoundPage = document.querySelector(".not-found")
-
-        if (coords.length === 0) {
-            searchCityPage.style.display = "none";
-            weatherPage.style.display = "none";
-            notFoundPage.style.display = ""
-        } else {
-            searchCityPage.style.display = "none";
-            notFoundPage.style.display = "none"
-            weatherPage.style.display = "";
-
-            await findWeather([coords[0].lat, coords[0].lon])
-        }
-
-    })
+    DOM.form.addEventListener("submit", handleCitySearch);
 }
 
-main()
+// invoke app
+main();

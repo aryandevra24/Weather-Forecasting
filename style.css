@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Single:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: white;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    width: 100%;
+    height: 100dvh;
+    background-image: url(./assets/bg.jpg);
+    background-size: cover;
+    background-position: center;
+    background: url(./assets/bg.jpg) center cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(15px);
+}
+
+.regular-text {
+    font-weight: 400;
+}
+
+.container {
+    width: 300px;
+    height: 530px;
+    z-index: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, .15), rgba(255, 255, 255, .15));
+    border-radius: 12px;
+    backdrop-filter: blur(100px);
+    padding: 20px;
+}
+
+.input-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.city-input {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 99px;
+    border: 3px solid transparent;
+    background: rgba(0, 0, 0, 0.15);
+    outline: none;
+    font-weight: 500;
+    transition: all .25s;
+    padding-right: 45px;
+}
+
+.city-input:focus {
+    border: 3px solid rgba(0, 0, 0, .15)
+}
+
+.city-input::placeholder {
+    color: rgba(255, 255, 255, .75)
+}
+
+.search-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+}
+
+.location-data-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.weather-summary-container {
+    border: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weather-summary-img {
+    width: 120px;
+    height: 120px;
+}
+
+.weather-summary-info {
+    text-align: end;
+}
+
+.weather-conditions-container {
+    display: flex;
+    gap: 15px;
+    overflow-x: scroll;
+    padding-bottom: 12px;
+}
+
+.weather-conditions-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.weather-conditions-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 99px;
+}
+
+.weather-conditions-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 99px;
+}
+
+.condition-item {
+    /* min-width: 135px; */
+    white-space: nowrap;
+    background: rgba(255, 255, 255, .15);
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 12px;
+    transition: background .3s;
+}
+
+.condition-item:hover {
+    background: rgba(255, 255, 255, .5);
+}
+
+.condition-item span {
+    font-size: 30px;
+}
+
+.forecast-items-container {
+    display: flex;
+    gap: 15px;
+    overflow-x: scroll;
+    padding-bottom: 12px;
+}
+
+.forecast-items-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.forecast-items-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 99px;
+}
+
+.forecast-items-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 99px;
+}
+
+.forecast-item {
+    min-width: 70px;
+    background: rgba(255, 255, 255, .15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 12px;
+    transition: background .3s;
+}
+
+.forecast-item-img {
+    width: 35px;
+    height: 35px;
+}
+
+.forecast-item:hover {
+    background: rgba(255, 255, 255, .5);
+}
+
+.section-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    margin-top: 35%;
+}
+
+.section-msg img {
+    height: 180px;
+    width: fit-content;
+}

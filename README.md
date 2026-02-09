@@ -2,7 +2,7 @@
 
 A beautiful and minimal weather application that shows real-time weather data, air quality, UV index and 5-day forecast for any city in the world.
 
-Built using HTML, CSS and Vanilla JavaScript and powered by the OpenWeatherMap API.
+Built using **HTML**, **CSS** and **Vanilla JavaScript** and powered by the **OpenWeatherMap API**.
 
 ---
 

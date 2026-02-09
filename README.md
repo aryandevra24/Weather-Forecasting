@@ -80,6 +80,8 @@ The app automatically shows:
 * Weather page when city is found
 * Not found page when city doesn't exist
 
+---
+
 ## 🚀 How to Run Locally
 
 1. Clone the repository
